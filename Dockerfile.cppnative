@@ -1,0 +1,23 @@
+FROM ubuntu:latest
+
+ARG GCC_PACKAGES="g++-8 g++-9 g++-10"
+ARG CLANG_VER="9 10 11"
+
+RUN echo "Installing required packages " \
+         && export DEBIAN_FRONTEND=noninteractive  \
+         && apt-get update \
+         && apt-get install -y \
+               wget \
+               gnupg2 \
+               lsb-release \
+               apt-utils \
+               software-properties-common \
+               ${GCC_PACKAGES} \
+         && apt-get autoremove --purge -y \
+         && apt-get autoclean -y \
+         && rm -rf /var/cache/apt/*
+
+RUN wget -O /tmp/llvm.sh https://apt.llvm.org/llvm.sh && chmod +x /tmp/llvm.sh
+RUN for version in ${CLANG_VER}; do /tmp/llvm.sh $version; done
+
+ENTRYPOINT [ "/usr/bin/g++-10" ]
